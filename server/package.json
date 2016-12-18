@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "bcryptjs": "^2.4.0",
+    "express-session": "^1.14.2",
+    "joi": "^10.0.6",
+    "morgan": "^1.7.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.3.30",
+    "@types/joi": "^9.0.33"
+  }
+}

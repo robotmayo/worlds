@@ -1,0 +1,11 @@
+{
+  "db": {
+    "user": "robotmayo",
+    "password": "root",
+    "database": "robotmayo",
+    "max": 10
+  },
+  "cookie": {
+    "secret": "secret"
+  }
+}
