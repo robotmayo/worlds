@@ -5,10 +5,14 @@
   "license": "private",
   "private": true,
   "dependencies": {
+    "bcryptjs": "^2.4.0",
     "body-parser": "^1.15.2",
     "connect-pg-simple": "^3.1.2",
     "express": "^4.14.0",
     "express-hbs": "^1.0.3",
+    "express-session": "^1.14.2",
+    "joi": "^10.0.6",
+    "morgan": "^1.7.0",
     "nconf": "^0.8.4",
     "passport": "^0.3.2",
     "passport-local": "^1.0.0"
@@ -16,6 +20,7 @@
   "devDependencies": {
     "@types/body-parser": "^0.0.33",
     "@types/express": "^4.0.34",
+    "@types/joi": "^10.0.0",
     "@types/node": "^0.0.3",
     "@types/passport": "^0.2.35",
     "@types/passport-local": "^1.0.29",
