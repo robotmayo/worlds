@@ -18,6 +18,19 @@ const registerSchema = joi.object({
   email: joi.string().required().max(256).email()
 });
 
+function serializeUser(user, done) {
+  done(null, user.id);
+}
+
+function deserializeUser(user, done) {
+    db.query('SELECT id as userID, email FROM user_accounts WHERE id = $1', [user.id])
+      .then(({rows}) => {
+        if (rows.length === 0) return done(new Error('Unable to find user'));
+        done(null, rows[0]);
+      })
+      .catch(done);
+  }
+
 function localStrategyHandler(email, password, done) {
   db.query('SELECT id AS userid, password AS hash FROM user_accounts WHERE email = $1', [email])
     .then(({rows}) => {
@@ -32,23 +45,35 @@ function localStrategyHandler(email, password, done) {
 
 function register({username, password, email}) {
   const hash = bcrypt.hashSync(password);
-  return db.query('INSERT INTO user_accounts (username, password, email) VALUES ($1, $2, $3)', [username, hash, email]);
+  return db.query('INSERT INTO user_accounts (username, password, email) VALUES ($1, $2, $3) RETURNING id', [username, hash, email]);
 }
 
 function postRegister(req, res) {
-  const userData = { username: req.body.username, password: req.body.password, email: req.body.email };
+  const body = req.body;
+  const {username, email, password} = body;
+  const userData = { username: username, password: password, email: email };
+  
   const result = registerSchema.validate(userData);
   if (result.error) {
     return res.json(result.error);
   }
   return register(userData)
     .then(results => {
-      res.send('OK');
+      return new Promise(function(resolve, reject){
+        req.login({id: results.rows[0].id}, function(err){
+          if(err) return reject(err);
+          resolve();
+        })
+      })
+    })
+    .then(() => {
+      res.redirect('/');
     })
     .catch(err => {
       res.json(err);
     })
 }
+
 
 function init(app) {
   app.use(session({
@@ -62,21 +87,14 @@ function init(app) {
 
   passport.use(new LocalStrategy({ usernameField: 'email' }, localStrategyHandler));
 
-  passport.serializeUser(function (user, done) {
-    done(null, user);
-  });
+  passport.serializeUser(serializeUser);
 
-  passport.deserializeUser(function (user, done) {
-    if (typeof user === 'object') return done(null, user);
-    db.query('SELECT id as userID, email FROM user_accounts WHERE id = $1', [user.id])
-      .then(({rows}) => {
-        if (rows.length === 0) return done(new Error('Unable to find user'));
-        done(null, rows[0]);
-      })
-      .catch(done);
-  });
+  passport.deserializeUser(deserializeUser);
   app.get('/login', function login(req, res) {
     res.render('login');
+  });
+  app.get('/register', function register(req, res){
+    res.render('register');
   });
   app.post('/register', postRegister);
   app.post('/login', passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login' }));

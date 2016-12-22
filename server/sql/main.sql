@@ -16,8 +16,8 @@ CREATE TABLE app_sessions (
 CREATE TABLE user_character(
   user_id int PRIMARY KEY,
   exp bigint,
-  game_points bigint,
-  game_cash int,
+  points bigint,
+  cash int,
   level int
 );
 
